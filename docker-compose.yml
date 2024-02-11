@@ -1,0 +1,96 @@
+version: '3.8'
+
+services:
+    Vortex_Edu-CRM:
+        image: kooldev/php:8.3
+        container_name: Vortex_Edu-CRM
+        working_dir: /Vortex_Edu-CRM
+        restart: always
+        networks:
+            - internal
+            - nginx_network
+        volumes:
+            - '.:/Vortex_Edu-CRM'
+            - './docker/php/php-ini-overrides.ini:/etc/php/8.3/fpm/conf.d/99-overrides.ini'
+        links:
+            - CRM-database
+        depends_on:
+            - CRM-database
+        environment:
+            - PHP_EXECUTABLE_PATH=/usr/local/bin/php
+    CRM-nginx:
+        image: nginx:alpine
+        container_name: CRM-nginx
+        restart: always
+        working_dir: /Vortex_Edu-CRM
+        networks:
+            - internal
+            - nginx_network
+        ports:
+            - "9000:80"
+        volumes:
+            - .:/Vortex_Edu-CRM
+            - ./docker/nginx/nginx.conf:/etc/nginx/conf.d/default.conf
+        depends_on:
+            - Vortex_Edu-CRM
+    CRM-composer:
+        image: composer:latest
+        container_name: CRM-composer
+        working_dir: /Vortex_Edu-CRM
+        command: update --ignore-platform-reqs
+        volumes:
+            - .:/Vortex_Edu-CRM
+        restart: on-failure
+        depends_on:
+            - Vortex_Edu-CRM
+    CRM-database:
+        image: mariadb:latest
+        restart: always
+        container_name: CRM-database
+        working_dir: /Vortex_Edu-CRM
+        networks:
+            - internal
+            - nginx_network
+        command: mysqld --skip-grant-tables
+        environment:
+            - MYSQL_ROOT_PASSWORD=password
+            - MYSQL_DATABASE=Edu-CRM
+            - MYSQL_USER=root
+            - MYSQL_PASSWORD=password
+        volumes:
+            - .:/Vortex_Edu-CRM
+            - ./CRM-database:/var/lib/mysql
+        ports:
+            - '8007:3306'
+    CRM-redis:
+        image: 'redis:alpine'
+        ports:
+            - '${FORWARD_REDIS_PORT:-6377}:6377'
+        volumes:
+            - CRM-redis:/data
+        networks:
+            - internal
+            - nginx_network
+        command: redis-server --save 20 1 --loglevel warning --requirepass eYVX7EwVmmxKPCDmwMtyKVge8oLd2t81
+
+    CRM-npm:
+        image: node:20-alpine
+        container_name: CRM-npm
+        working_dir: /Vortex_Edu-CRM
+        volumes:
+            - '.:/Vortex_Edu-CRM'
+        depends_on:
+            - Vortex_Edu-CRM
+
+networks:
+    nginx_network:
+        external: true
+    internal:
+        driver: overlay
+        name: 'global'
+        attachable: true
+volumes:
+    CRM-database:
+        driver: local
+    CRM-redis:
+        driver: local
