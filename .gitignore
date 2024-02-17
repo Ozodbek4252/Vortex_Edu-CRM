@@ -17,5 +17,5 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-/CRM-database
-CRM-database
+/edu-database
+edu-database
