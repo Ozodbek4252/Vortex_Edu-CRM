@@ -72,6 +72,22 @@
                 <li class="menu-title">Apps</li>
 
                 <li>
+                    <a href="javascript: void(0);" class="has-arrow waves-effect">
+                        <i class="uil-cog"></i>
+                        <span>Settings</span>
+                    </a>
+                    <ul class="sub-menu" aria-expanded="true">
+                        <li><a href="javascript: void(0);" class="has-arrow">Organization Structure</a>
+                            <ul class="sub-menu" aria-expanded="true">
+                                <li><a href="{{ Route('levels.index') }}">Levels</a></li>
+                                <li><a href="javascript: void(0);">Level 2.2</a></li>
+                            </ul>
+                        </li>
+                        <li><a href="{{ Route('locales.index') }}">Locale</a></li>
+                    </ul>
+                </li>
+
+                <li>
                     <a href="calendar.html" class="waves-effect">
                         <i class="uil-calender"></i>
                         <span>Calendar</span>
